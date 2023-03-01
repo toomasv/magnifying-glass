@@ -26,7 +26,6 @@ make-glass: does [
 	p1: either shape = 'round [frame * cosine 45][frame + 2]
 	p2: p1 + 30
 	p3: p1 + 15
-	;p4: p3/x
 	point: as-pair 0 mghsz/y
 ]
 make-glass
@@ -162,10 +161,9 @@ ask-limits: function ['mn 'mx 'cr][
 				set mx f2/data 
 				set cr f3/data 
 				val: (f3/data - f1/data) / (f2/data - f1/data)
-				;gval: gcur - gmin / (gmax - gmin)
 				switch mn [
-					gmin [gval: slg/data: val slg/actors/on-change slg none];gtx/text: form gcur]
-					zmin [zval: slz/data: val slz/actors/on-change slz none];ztx/text: form zcur]
+					gmin [gval: slg/data: val slg/actors/on-change slg none]
+					zmin [zval: slz/data: val slz/actors/on-change slz none]
 				]
 				show lay
 				unview
@@ -189,10 +187,8 @@ view/flags/options/no-wait lay: layout compose/deep [
 	at 10x10 bx: box glass (sz) 
 		all-over
 		on-down [recalculate ofs: event/offset] 
-		on-over [
-			if event/down? [recalculate ofs: event/offset]
-		]
-		on-up [set-focus zm show lay]
+		on-over [if event/down? [recalculate ofs: event/offset]]
+		on-up   [set-focus zm show lay]
 	return 
 	pan: panel [origin 0x0 
 		txz: text "Zoom:" 37 
