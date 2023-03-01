@@ -256,7 +256,7 @@ view/flags/options/no-wait lay: layout compose/deep [
 				net   [if file: ask-url "text"  [render-text  file]]
 				round [render-glass 'round]
 				rect  [render-glass 'rect]
-				zlim  [ask-limits zmin zmax zcur]
+				zlim  [zcur: round/to zcur 0.1 ask-limits zmin zmax zcur]
 				glim  [ask-limits gmin gmax gcur]
 			]
 		]
