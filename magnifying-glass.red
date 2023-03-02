@@ -57,6 +57,7 @@ recalculate: func [ofs0][
 	zm/draw/3/push/matrix/6: ofs3y + mgsz/y - ofs2y
 	show zm
 ]
+base: [image img]
 template: round-template: [
 	matrix [1 0 0 1 (ofs2x) (ofs2y)][
 		pen coal line-width 6 
@@ -68,16 +69,15 @@ template: round-template: [
 				arc (0 - point) (mghsz/x) (mghsz/y) 0 
 				arc (point)     (mghsz/x) (mghsz/y) 0
 			] 
-			matrix [(zcur) 0 0 (zcur) (ofs2x) (ofs2y)] [image img]
+			matrix [(zcur) 0 0 (zcur) (ofs2x) (ofs2y)] (base)
 		]
-		pen off fill-pen radial 0.0.0.255 0.0.0.240 0.0.0.200 1.0 
+		pen off fill-pen radial 0.0.0.255 0.0.0.240 0.0.0.200 (0x0) (max mghsz/x mghsz/y) 
 		ellipse (0 - mghsz) (mgsz) 
 	]
 ]
 rect-template: [
 	matrix [1 0 0 1 (ofs2x) (ofs2y)][
 		pen coal line-width 6 
-		;shadow -5x5 5 0 128.128.128
 		box (negate frame) (frame) 
 		line-width 8 line-cap round line (p1) (p2)
 		push [
@@ -85,19 +85,19 @@ rect-template: [
 				move (negate mghsz)
 				hline (mghsz/x) vline (mghsz/y) hline (0 - mghsz/x) vline (0 - mghsz/y)
 			]
-			matrix [(zcur) 0 0 (zcur) (ofs2x) (ofs2y)] [image img]
+			matrix [(zcur) 0 0 (zcur) (ofs2x) (ofs2y)] (base)
 		]
-		pen off fill-pen radial 0.0.0.255 0.0.0.240 0.0.0.200 1.0 
+		pen off fill-pen radial 0.0.0.255 0.0.0.240 0.0.0.200 (0x0) (sqrt add mghsz/x ** 2 mghsz/y ** 2) 
 		box (0 - mghsz) (mghsz) 
 	]
 ]
-pic: compose/deep template
+pic: compose/only/deep template
 new-image: func [face][
 	im/size: zm/size: bx/size: sz
 	pan/offset/y: im/offset/y + sz/y + 10
 	face/size: as-pair 20 + max im/size/x pan/size/x 
 					   10 + pan/offset/y + pan/size/y
-	zm/draw: compose/deep template
+	zm/draw: compose/only/deep template
 	recalculate ofs
 	show lay
 ]
@@ -105,14 +105,14 @@ render-image: func [file][
 	type: 'image
 	img: get-img file 
 	im/draw: [image img]
-	template/3/push/5: [image img]
+	base: [image img]
 	new-image lay
 ]
 render-text: func [file][
 	type: 'text
 	img: get-img read file
 	im/draw: compose [text 0x0 (img)]
-	template/3/push/5: [pen off fill-pen white box 0x0 (sz) text 0x0 (img)]
+	base: [pen off fill-pen white box 0x0 (sz) text 0x0 (img)]
 	new-image lay
 ]
 render-glass: func [what][
@@ -126,7 +126,7 @@ render-glass: func [what][
 		text  [template/3/push/5: [pen off fill-pen white box 0x0 (sz) text 0x0 (img)]]
 	]
 	make-glass
-	zm/draw: compose/deep template
+	zm/draw: compose/only/deep template
 	recalculate ofs2 + p3
 ]
 ask-url: function [type [string!]][
@@ -214,8 +214,9 @@ view/flags/options/no-wait lay: layout compose/deep [
 				both [mgsz: to-pair gcur]
 			]
 			make-glass
-			zm/draw: compose/deep template
+			zm/draw: compose/only/deep template
 			recalculate ofs: p3 + ofs2
+			;probe zm/draw
 			gtx/text: form gcur
 			show [zm gtx]
 		] 
@@ -256,7 +257,8 @@ view/flags/options/no-wait lay: layout compose/deep [
 				net   [if file: ask-url "text"  [render-text  file]]
 				round [render-glass 'round]
 				rect  [render-glass 'rect]
-				zlim  [zcur: round/to zcur 0.1 ask-limits zmin zmax zcur]
+				zlim  [zcur: round/to zcur 0.1 
+				       ask-limits zmin zmax zcur]
 				glim  [ask-limits gmin gmax gcur]
 			]
 		]
